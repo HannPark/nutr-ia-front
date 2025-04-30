@@ -63,7 +63,7 @@
       <h3>Diagnóstico</h3>
       <p><strong>Condición:</strong> {{ assessmentResult.diagnosis.condition }}</p>
       <p><strong>IMC:</strong> {{ assessmentResult.diagnosis.bmi }}</p>
-      <p><strong>Categoría:</strong> {{ assessmentResult.diagnosis.category }}</p>
+      <p><strong>Categoría:</strong> {{ assessmentResult.diagnosis.category }} - {{assessmentResult.diagnosis.bmi_category}}</p>
       <p>{{ assessmentResult.diagnosis.description }}</p>
     </div>
 
@@ -100,6 +100,17 @@
         <h4>{{ recipe.name }}</h4>
         <p>{{ recipe.description }}</p>
         <a *ngIf="recipe.url" [href]="recipe.url" target="_blank">Ver receta completa</a>
+        <p><strong>Instrucciones:</strong></p>
+        <div *ngIf="recipe.instructions.length > 0">
+          <div *ngFor="let inst of recipe.instructions">
+            <ul>{{inst}}</ul>
+          </div>
+        </div>
+        <p><strong>Ingredientes:</strong></p>
+        <div *ngIf="recipe.main_ingredients.length > 0">
+          <div *ngFor="let ing of recipe.main_ingredients">
+            <ul>{{ing}}</ul>
+          </div>
       </div>
     </div>
 
@@ -108,6 +119,7 @@
       <div *ngFor="let video of assessmentResult.videos">
         <h4>{{ video.title }}</h4>
         <p>{{ video.description }}</p>
+        <p><strong>Autor:</strong> {{ video.author }}</p>
         <a *ngIf="video.url" [href]="video.url" target="_blank">Ver video</a>
       </div>
     </div>
