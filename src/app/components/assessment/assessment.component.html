@@ -1,0 +1,117 @@
+<div class="container">
+  <h1>NUTR-IA - Evaluación Nutricional</h1>
+
+  <div class="assessment-form" *ngIf="!assessmentResult">
+    <h2>Información del Paciente</h2>
+
+    <div class="form-group">
+      <label for="patientInfo">Describir su situación nutricional:</label>
+      <textarea
+        id="patientInfo"
+        rows="5"
+        [(ngModel)]="patientInfo"
+        placeholder="Ejemplo: Necesito una dieta para reducir mi peso. Tengo 35 años, mido 1.75m y peso 95kg. Soy sedentario y no me gustan los mariscos."
+      ></textarea>
+    </div>
+
+    <div class="form-group">
+      <label for="imageUpload">Subir imagen (opcional):</label>
+      <input
+        type="file"
+        id="imageUpload"
+        (change)="onFileSelected($event)"
+        accept="image/*"
+      >
+    </div>
+
+    <div class="actions">
+      <button
+        (click)="startAssessment()"
+        [disabled]="loading || !patientInfo"
+      >
+        Iniciar Evaluación
+      </button>
+
+      <button
+        (click)="startRealtimeAssessment()"
+        [disabled]="loading || !patientInfo"
+      >
+        Evaluación en Tiempo Real
+      </button>
+
+      <button
+        *ngIf="loading && websocketActive"
+        (click)="cancelAssessment()"
+      >
+        Cancelar
+      </button>
+    </div>
+  </div>
+
+  <div class="status-messages" *ngIf="loading">
+    <h3>Estado del Proceso:</h3>
+    <ul>
+      <li *ngFor="let message of statusMessages">{{ message }}</li>
+    </ul>
+    <div class="loading-spinner" *ngIf="loading"></div>
+  </div>
+
+  <div class="assessment-result" *ngIf="assessmentResult">
+    <h2>Resultado de la Evaluación</h2>
+
+    <div class="result-section">
+      <h3>Diagnóstico</h3>
+      <p><strong>Condición:</strong> {{ assessmentResult.diagnosis.condition }}</p>
+      <p><strong>IMC:</strong> {{ assessmentResult.diagnosis.bmi }}</p>
+      <p><strong>Categoría:</strong> {{ assessmentResult.diagnosis.category }}</p>
+      <p>{{ assessmentResult.diagnosis.description }}</p>
+    </div>
+
+    <div class="result-section">
+      <h3>Plan de Dieta Mensual</h3>
+      <p><strong>Tipo de Dieta:</strong> {{ assessmentResult.diet_plan.diet_type }}</p>
+      <p><strong>Calorías Diarias:</strong> {{ assessmentResult.diet_plan.daily_calories }} kcal</p>
+
+      <div *ngFor="let meal of assessmentResult.diet_plan.meals">
+        <h4>{{ meal.name }}</h4>
+        <ul>
+          <li *ngFor="let item of meal.items">{{ item }}</li>
+        </ul>
+      </div>
+
+      <p><strong>Recomendaciones:</strong> {{ assessmentResult.diet_plan.recommendations }}</p>
+    </div>
+
+    <div class="result-section">
+      <h3>Rutina de Ejercicios</h3>
+      <p>{{ assessmentResult.exercise_routine.description }}</p>
+
+      <div *ngFor="let exercise of assessmentResult.exercise_routine.exercises">
+        <h4>{{ exercise.name }}</h4>
+        <p>{{ exercise.description }}</p>
+        <p><strong>Frecuencia:</strong> {{ exercise.frequency }}</p>
+        <p><strong>Duración:</strong> {{ exercise.duration }}</p>
+      </div>
+    </div>
+
+    <div class="result-section">
+      <h3>Recetas Recomendadas</h3>
+      <div *ngFor="let recipe of assessmentResult.recipes">
+        <h4>{{ recipe.name }}</h4>
+        <p>{{ recipe.description }}</p>
+        <a *ngIf="recipe.url" [href]="recipe.url" target="_blank">Ver receta completa</a>
+      </div>
+    </div>
+
+    <div class="result-section">
+      <h3>Videos Informativos</h3>
+      <div *ngFor="let video of assessmentResult.videos">
+        <h4>{{ video.title }}</h4>
+        <p>{{ video.description }}</p>
+        <a *ngIf="video.url" [href]="video.url" target="_blank">Ver video</a>
+      </div>
+    </div>
+
+    <button (click)="assessmentResult = null">Nueva Evaluación</button>
+  </div>
+</div>
