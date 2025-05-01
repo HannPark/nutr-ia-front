@@ -1,0 +1,38 @@
+<div class="chat-container">
+  <div class="chat-messages" #chatMessages>
+    <div *ngFor="let msg of messages" [ngClass]="'message-' + msg.sender">
+      <div class="message-content">
+        <span class="message-sender" *ngIf="msg.sender !== 'system'">
+          {{ msg.sender === 'user' ? 'Tú' : 'Asistente Nutricional' }}
+        </span>
+        <p [innerHTML]="msg.message"></p>
+        <span class="message-time">
+          {{ msg.timestamp | date:'shortTime' }}
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-input">
+    <input
+      type="text"
+      [(ngModel)]="userMessage"
+      placeholder="Escribe tu respuesta..."
+      (keyup.enter)="sendMessage()"
+      [disabled]="!isConnected || isComplete"
+    />
+    <button
+      (click)="sendMessage()"
+      [disabled]="!userMessage || !isConnected || isComplete"
+    >
+      Enviar
+    </button>
+
+    <button
+      *ngIf="isComplete"
+      (click)="startAssessmentWithData()"
+    >
+      Iniciar Evaluación
+    </button>
+  </div>
+</div>

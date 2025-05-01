@@ -1,17 +1,18 @@
-// assessment.component.ts
-import { Component } from '@angular/core';
+import { Component} from '@angular/core';
 import { NutrIaService } from '../../services/nutria.service';
 import { WebSocketSubject } from 'rxjs/webSocket';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
+import { ChatComponent } from '../chat/chat.component';
 
 @Component({
   selector: 'app-assessment',
   imports: [
     CommonModule,
     FormsModule,
-    HttpClientModule
+    HttpClientModule,
+    ChatComponent
   ],
   providers: [NutrIaService],
   standalone: true,
@@ -26,6 +27,9 @@ export class AssessmentComponent {
   statusMessages: string[] = [];
   websocketActive: boolean = false;
   socket$: WebSocketSubject<any> | null = null;
+  // Propiedades para el chat
+  showChat: boolean = false;
+  collectedUserData: any = null;
 
   constructor(private nutriaService: NutrIaService) { }
 
@@ -42,7 +46,6 @@ export class AssessmentComponent {
 
     this.loading = true;
     this.statusMessages = ['Iniciando evaluación...'];
-
     this.nutriaService.assessPatient(this.patientInfo, this.selectedFile || undefined)
       .subscribe({
         next: (result) => {
@@ -67,9 +70,7 @@ export class AssessmentComponent {
     this.loading = true;
     this.websocketActive = true;
     this.statusMessages = ['Conectando...'];
-
     this.socket$ = this.nutriaService.connectAssessment();
-
     this.socket$.subscribe({
       next: (message) => {
         this.statusMessages.push(message.status);
@@ -95,6 +96,11 @@ export class AssessmentComponent {
     this.socket$.next({ patient_info: this.patientInfo });
   }
 
+  // Mostrar interfaz de chat para recopilar información
+  startChatAssessment(): void {
+    this.showChat = true;
+  }
+
   // Cancelar evaluación y cerrar WebSocket
   cancelAssessment(): void {
     if (this.socket$) {
@@ -103,6 +109,38 @@ export class AssessmentComponent {
       this.websocketActive = false;
       this.statusMessages.push('Evaluación cancelada por el usuario');
     }
+  }
+
+   // Manejar la finalización del chat con datos recopilados
+   handleChatComplete(userData: any): void {
+    this.collectedUserData = userData;
+    this.showChat = false;
+
+    // Iniciar evaluación con los datos recopilados
+    this.loading = true;
+    this.statusMessages = ['Procesando evaluación con la información recopilada...'];
+
+    this.nutriaService.assessPatientWithData(userData)
+      .subscribe({
+        next: (result) => {
+          this.assessmentResult = result;
+          this.loading = false;
+        },
+        error: (error) => {
+          console.error('Error en la evaluación:', error);
+          this.statusMessages.push('Error: ' + error.message);
+          this.loading = false;
+        }
+      });
+  }
+
+  // Reiniciar todo el proceso
+  resetAssessment(): void {
+    this.assessmentResult = null;
+    this.showChat = false;
+    this.collectedUserData = null;
+    this.patientInfo = '';
+    this.statusMessages = [];
   }
 
   ngOnDestroy(): void {

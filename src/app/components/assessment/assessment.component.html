@@ -1,7 +1,7 @@
 <div class="container">
   <h1>NUTR-IA - Evaluación Nutricional</h1>
 
-  <div class="assessment-form" *ngIf="!assessmentResult">
+  <div class="assessment-form" *ngIf="!assessmentResult && !showChat">
     <h2>Información del Paciente</h2>
 
     <div class="form-group">
@@ -40,12 +40,31 @@
       </button>
 
       <button
+        (click)="startChatAssessment()"
+        [disabled]="loading"
+      >
+        Iniciar Chat Asistente
+      </button>
+
+      <button
         *ngIf="loading && websocketActive"
         (click)="cancelAssessment()"
       >
         Cancelar
       </button>
     </div>
+  </div>
+
+  <!-- Componente de Chat -->
+  <div *ngIf="showChat" class="chat-container">
+    <div class="chat-header">
+      <h2>Asistente Nutricional</h2>
+      <button (click)="showChat = false">Cerrar</button>
+    </div>
+
+    <app-chat
+      (assessmentComplete)="handleChatComplete($event)"
+    ></app-chat>
   </div>
 
   <div class="status-messages" *ngIf="loading">
@@ -111,6 +130,7 @@
           <div *ngFor="let ing of recipe.main_ingredients">
             <ul>{{ing}}</ul>
           </div>
+        </div>
       </div>
     </div>
 
@@ -124,6 +144,6 @@
       </div>
     </div>
 
-    <button (click)="assessmentResult = null">Nueva Evaluación</button>
+    <button (click)="resetAssessment()">Nueva Evaluación</button>
   </div>
 </div>
